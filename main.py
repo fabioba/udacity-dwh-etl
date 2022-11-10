@@ -17,24 +17,35 @@ logging.basicConfig(format=FORMAT, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-
-
 def main():
-    config = configparser.ConfigParser()
-    config.read('dwh.cfg')
+    """
+        Entrypoint of the project.
 
-    print(config['IAM_ROLE']['ARN'])
-
-    conn = psycopg2.connect("host={} dbname={} user={} password={} port={}".format(*config['CLUSTER'].values()))
-    cur = conn.cursor()
-
-    create_tables.drop_tables(cur, conn)
-    create_tables.create_tables(cur, conn)
+        Run:
+            1. create table script
+            2. etl script
     
-    etl.load_staging_tables(cur, conn)
-    etl.insert_tables(cur, conn)
+    """
+    try:
+        config = configparser.ConfigParser()
+        config.read('config/dwh.cfg')
 
-    conn.close()
+        conn = psycopg2.connect("host={} dbname={} user={} password={} port={}".format(*config['CLUSTER'].values()))
+        cur = conn.cursor()
+
+        logger.info('run create_tables')
+        create_tables.drop_tables(cur, conn)
+        create_tables.create_tables(cur, conn)
+        
+        logger.info('run etl')
+        etl.load_staging_tables(cur, conn)
+        etl.insert_tables(cur, conn)
+
+        conn.close()
+
+    except Exception as err:
+        logger.exception(err)
+        raise err
 
 
 if __name__ == "__main__":

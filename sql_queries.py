@@ -4,16 +4,14 @@ This module includes the queries used to create the tables
 Author: Fabio Barbazza
 Date: Nov, 2022
 """
-
 import configparser
 
 
-# CONFIG
+# read config dwh
 config = configparser.ConfigParser()
-config.read('dwh.cfg')
+config.read('config/dwh.cfg')
 
-# DROP TABLES
-
+# queries to drop table
 songs_table_drop = "DROP TABLE IF EXISTS songs"
 songplays_table_drop = "DROP TABLE IF EXISTS songplays"
 users_table_drop = "DROP TABLE IF EXISTS users"
@@ -21,10 +19,10 @@ artists_table_drop = "DROP TABLE IF EXISTS artists"
 time_table_drop = "DROP TABLE IF EXISTS time"
 
 
-# CREATE TABLES
+# queries to create tables
 songplay_table_create = ("""
     CREATE TABLE IF NOT EXISTS songplays(
-        songplay_id VARCHAR IDENTITY(0,1) PRIMARY KEY,
+        songplay_id bigint IDENTITY(0,1) PRIMARY KEY,
         start_time timestamp NOT NULL,
         user_id VARCHAR NOT NULL, 
         level VARCHAR NOT NULL, 
@@ -78,7 +76,7 @@ time_table_create = ("""
     )
 """)
 
-# STAGING TABLES
+# staging tables
 staging_songs_table_create= ("""
     CREATE TABLE IF NOT EXISTS songs_staging(
         songplay_id VARCHAR NOT NULL PRIMARY KEY,
@@ -119,10 +117,9 @@ credentials 'aws_iam_role={}'
 gzip region 'us-east-1';
 """).format(config['S3']['SONG_DATA'], config['IAM_ROLE']['ARN'])
 
-# FINAL TABLES
-
+# fact table
 songplay_table_insert = ("""
-    INSERT INTO users(
+    INSERT INTO songplays(
             select 
                 logs_staging.registration,
                 logs_staging.userId,
@@ -135,7 +132,7 @@ songplay_table_insert = ("""
             from logs_staging
             left join songs_staging
             on logs_staging.artist=song.artist_name
-        ) on conflict (userId) do nothing
+        )
 """)
 
 user_table_insert = ("""
@@ -147,6 +144,7 @@ user_table_insert = ("""
             gender,
             level
         from logs_staging
+        qualify row_number() over(partition by userId)=1
     ) on conflict (userId) do nothing
 """)
 
@@ -186,11 +184,10 @@ time_table_insert = ("""
             weekday,
             logs_staging
         from songs_staging
-    ) on conflict (time_id) do nothing
+    )
 """)
 
 # QUERY LISTS
-
 create_table_queries = [songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create, staging_songs_table_create, staging_logs_table_create]
 drop_table_queries = [songs_table_drop, songplays_table_drop, users_table_drop, artists_table_drop, time_table_drop]
 copy_table_queries = [staging_events_copy, staging_songs_copy]
