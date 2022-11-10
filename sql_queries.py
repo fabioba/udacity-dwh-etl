@@ -132,7 +132,7 @@ songplay_table_insert = ("""
             from logs_staging
             left join songs_staging
             on logs_staging.artist=song.artist_name
-        ) on conflict (userId) do nothing
+        )
 """)
 
 user_table_insert = ("""
@@ -184,7 +184,7 @@ time_table_insert = ("""
             weekday,
             logs_staging
         from songs_staging
-    ) on conflict (time_id) do nothing
+    )
 """)
 
 # QUERY LISTS
