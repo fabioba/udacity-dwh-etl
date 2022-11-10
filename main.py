@@ -28,11 +28,11 @@ def main():
     conn = psycopg2.connect("host={} dbname={} user={} password={} port={}".format(*config['CLUSTER'].values()))
     cur = conn.cursor()
 
-    #create_tables.drop_tables(cur, conn)
-    #create_tables.create_tables(cur, conn)
+    create_tables.drop_tables(cur, conn)
+    create_tables.create_tables(cur, conn)
     
     etl.load_staging_tables(cur, conn)
-    #etl.insert_tables(cur, conn)
+    etl.insert_tables(cur, conn)
 
     conn.close()
 
