@@ -4,8 +4,6 @@ This module includes all the steps necessary to create tables
 Author: Fabio Barbazza
 Date: Nov, 2022
 """
-import configparser
-import psycopg2
 from sql_queries import create_table_queries, drop_table_queries
 import logging
 
@@ -50,7 +48,7 @@ def create_tables(cur, conn):
 
             cur.execute(query)
             conn.commit()
-            
+
         logger.info('success create tables')
 
     except Exception as err:

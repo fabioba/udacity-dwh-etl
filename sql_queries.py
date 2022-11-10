@@ -4,13 +4,12 @@ This module includes the queries used to create the tables
 Author: Fabio Barbazza
 Date: Nov, 2022
 """
-
 import configparser
 
 
-# CONFIG
+# read config dwh
 config = configparser.ConfigParser()
-config.read('dwh.cfg')
+config.read('config/dwh.cfg')
 
 # queries to drop table
 songs_table_drop = "DROP TABLE IF EXISTS songs"
