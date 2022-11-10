@@ -7,6 +7,16 @@ A music streaming startup, Sparkify, has grown their user base and song database
 Their data resides in S3, in a directory of JSON logs on user activity on the app, as well as a directory with JSON metadata on the songs in their app.
 
 
+## Getting Started
+From terminal, to start the entire workflow:
+* create tables
+* etl process
+
+Run the following scipt:
+```
+python main.py
+```
+
 ## Project Structure
 * `dwh.cfg` contains config data
 
